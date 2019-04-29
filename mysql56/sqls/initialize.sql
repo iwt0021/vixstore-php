@@ -2,9 +2,9 @@ DROP DATABASE IF EXISTS vrecog;
 CREATE DATABASE vrecog CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE vrecog;
 
-CREATE USER vrecog@'localhost' IDENTIFIED BY '404libfmqiX1';
+CREATE USER vrecog@'localhost' IDENTIFIED BY '';
 GRANT ALL PRIVILEGES ON vrecog.* TO vrecog@'localhost';
-CREATE USER vrecog@'%' IDENTIFIED BY '404libfmqiX1';
+CREATE USER vrecog@'%' IDENTIFIED BY '';
 GRANT ALL PRIVILEGES ON vrecog.* TO vrecog@'%';
 
 CREATE TABLE m_user (

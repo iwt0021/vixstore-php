@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  php56:
+    container_name: php56
+    build:
+      context: ./php56
+      dockerfile: Dockerfile
+    volumes:
+      - ./php56/html:/var/www/html
+    ports:
+      - "80:80"
+    depends_on:
+      - mysql56
+    networks:
+      br0:
+        ipv4_address: 192.168.67.3
+
+  mysql56:
+    container_name: mysql56
+    build:
+      context: ./mysql56
+      dockerfile: Dockerfile
+    ports:
+      - 3306:3306
+    environment:
+      - TZ=Asia/Tokyo
+      - MYSQL_ROOT_PASSWORD=O9MLOOKf
+    volumes:
+      - ./mysql56/sqls:/docker-entrypoint-initdb.d
+    networks:
+      br0:
+        ipv4_address: 192.168.67.2
+
+networks:
+  br0:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 192.168.67.0/24

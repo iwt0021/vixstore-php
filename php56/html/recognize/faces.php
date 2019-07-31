@@ -77,6 +77,8 @@ try {
 
 			insertExecApiFile($apiSeq, $cfgCur['userId'], $imageFile['size'], $imageMime,
 					$imageFile['tmp_name'], $dbh);
+
+			$res['apiCount'] = countApiExecInMonth($cfgCur['userId'], $SRV_API_KIND, time(), $dbh);
 		}
 	} else {
 		error_log(json_encode($res['messages']));

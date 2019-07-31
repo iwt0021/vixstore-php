@@ -1,6 +1,6 @@
 <?php
 
-$SRV_APP_VER = '2.0.0';
+$SRV_APP_VER = '2.0.2';
 
 $WAT_VRECOG_API_KEY = '';
 $WAT_VRECOG_API_URL = 'https://gateway.watsonplatform.net/visual-recognition/api/v3/detect_faces?version=2018-03-19';
@@ -173,6 +173,7 @@ function checkApiLimit($userId, $kind, $span, $limitCnt, &$dbh) {
 		. "FROM t_exec_api\n"
 		. "WHERE user_id=:user_id\n"
 		. " AND kind=:kind\n"
+		. " AND res_status IN ('OK','ERROR')\n"
 		. " AND created_at>:created_at\n");
 	$sthSel->bindParam(':user_id', $userId);
 	$sthSel->bindParam(':kind', $kind);
@@ -186,6 +187,40 @@ function checkApiLimit($userId, $kind, $span, $limitCnt, &$dbh) {
 	}
 
 	return $cnt > $limitCnt;
+}
+
+function countApiExecInMonth($userId, $kind, $time, &$dbh) {
+	$year1 = intval(date('Y'));
+	$month1 = intval(date('n'));
+	$year2 = $year1;
+	$month2 = $month1 + 1;
+	if($month2 == 13) {
+		$year2++;
+		$month2 = 1;
+	}
+	$fromStr = sprintf('%04d-%02d-01 00:00:00', $year1, $month1);
+	$toStr = sprintf('%04d-%02d-01 00:00:00', $year2, $month2);
+
+	$sthSel = $dbh->prepare(''
+		. "SELECT COUNT(*) AS cnt\n"
+		. "FROM t_exec_api\n"
+		. "WHERE user_id=:user_id\n"
+		. " AND kind=:kind\n"
+		. " AND res_status IN ('OK','ERROR')\n"
+		. " AND created_at>=:from_str\n"
+		. " AND created_at<:to_str\n");
+	$sthSel->bindParam(':user_id', $userId);
+	$sthSel->bindParam(':kind', $kind);
+	$sthSel->bindParam(':from_str', $fromStr);
+	$sthSel->bindParam(':to_str', $toStr);
+	$cnt = 0;
+	if($sthSel->execute()) {
+		while($rsh = $sthSel->fetch()) {
+			$cnt = $rsh['cnt'];
+		}
+	}
+
+	return $cnt;
 }
 
 function watson_recognize_faces($cfg, $imagePath, $imageMime, &$errMsgs) {
